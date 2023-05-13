@@ -1,113 +1,147 @@
-import Image from 'next/image'
+import { cookies } from "next/headers";
+import { kv } from "@vercel/kv";
+import * as csv from "csv/sync";
+import { ResponseCookies } from "next/dist/compiled/@edge-runtime/cookies";
+import { randomUUID } from "crypto";
+import { addMinutes } from "date-fns";
 
-export default function Home() {
-  return (
-    <main className="flex min-h-screen flex-col items-center justify-between p-24">
-      <div className="z-10 w-full max-w-5xl items-center justify-between font-mono text-sm lg:flex">
-        <p className="fixed left-0 top-0 flex w-full justify-center border-b border-gray-300 bg-gradient-to-b from-zinc-200 pb-6 pt-8 backdrop-blur-2xl dark:border-neutral-800 dark:bg-zinc-800/30 dark:from-inherit lg:static lg:w-auto  lg:rounded-xl lg:border lg:bg-gray-200 lg:p-4 lg:dark:bg-zinc-800/30">
-          Get started by editing&nbsp;
-          <code className="font-mono font-bold">src/app/page.tsx</code>
-        </p>
-        <div className="fixed bottom-0 left-0 flex h-48 w-full items-end justify-center bg-gradient-to-t from-white via-white dark:from-black dark:via-black lg:static lg:h-auto lg:w-auto lg:bg-none">
-          <a
-            className="pointer-events-none flex place-items-center gap-2 p-8 lg:pointer-events-auto lg:p-0"
-            href="https://vercel.com?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            By{' '}
-            <Image
-              src="/vercel.svg"
-              alt="Vercel Logo"
-              className="dark:invert"
-              width={100}
-              height={24}
-              priority
-            />
-          </a>
-        </div>
-      </div>
+const alias: Record<string, string> = {
+  "D✪N’T ST✪P R✪CKIN’": "D✪N’T  ST✪P  R✪CKIN’",
+};
 
-      <div className="relative flex place-items-center before:absolute before:h-[300px] before:w-[480px] before:-translate-x-1/2 before:rounded-full before:bg-gradient-radial before:from-white before:to-transparent before:blur-2xl before:content-[''] after:absolute after:-z-20 after:h-[180px] after:w-[240px] after:translate-x-1/3 after:bg-gradient-conic after:from-sky-200 after:via-blue-200 after:blur-2xl after:content-[''] before:dark:bg-gradient-to-br before:dark:from-transparent before:dark:to-blue-700 before:dark:opacity-10 after:dark:from-sky-900 after:dark:via-[#0141ff] after:dark:opacity-40 before:lg:h-[360px]">
-        <Image
-          className="relative dark:drop-shadow-[0_0_0.3rem_#ffffff70] dark:invert"
-          src="/next.svg"
-          alt="Next.js Logo"
-          width={180}
-          height={37}
-          priority
-        />
-      </div>
+async function fetchMaimaiArcadeSongs() {
+  const data = await fetch(
+    "https://dp4p6x0xfi5o9.cloudfront.net/maimai/data.json",
+    {
+      cache: "no-cache",
+    }
+  ).then((res) => res.json());
 
-      <div className="mb-32 grid text-center lg:mb-0 lg:grid-cols-4 lg:text-left">
-        <a
-          href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Docs{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Find in-depth information about Next.js features and API.
-          </p>
-        </a>
+  const allSongs: Song[] = data.songs;
+  const internationalSongs = allSongs.filter((song) => {
+    return song.sheets.some((sheet) => sheet.regions.intl);
+  });
 
-        <a
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800 hover:dark:bg-opacity-30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Learn{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Learn about Next.js in an interactive course with&nbsp;quizzes!
-          </p>
-        </a>
+  const versions: Version[] = data.versions;
 
-        <a
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Templates{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Explore the Next.js 13 playground.
-          </p>
-        </a>
-
-        <a
-          href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-          className="group rounded-lg border border-transparent px-5 py-4 transition-colors hover:border-gray-300 hover:bg-gray-100 hover:dark:border-neutral-700 hover:dark:bg-neutral-800/30"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <h2 className={`mb-3 text-2xl font-semibold`}>
-            Deploy{' '}
-            <span className="inline-block transition-transform group-hover:translate-x-1 motion-reduce:transform-none">
-              -&gt;
-            </span>
-          </h2>
-          <p className={`m-0 max-w-[30ch] text-sm opacity-50`}>
-            Instantly deploy your Next.js site to a shareable URL with Vercel.
-          </p>
-        </a>
-      </div>
-    </main>
-  )
+  return { internationalSongs, versions };
 }
+
+async function maimaiScore(data: FormData) {
+  "use server";
+
+  // const mutableCookie = cookies() as unknown as ResponseCookies;
+  // const sid = randomUUID();
+
+  // const exp = addMinutes(new Date(), 10);
+
+  // mutableCookie.set({
+  //   name: "sid",
+  //   value: sid,
+  //   expires: exp,
+  // });
+
+  const mai = data.get("data")?.toString() ?? "";
+
+  const maimaiScoreList = csv.parse(mai, {
+    delimiter: "\t",
+    quote: false,
+    escape: false,
+  }) as string[];
+
+  const aliasReplaced = maimaiScoreList.map((arr) => {
+    const name = alias[arr[0]] ?? arr[0];
+    return [name, ...arr.slice(1)] as string[];
+  });
+
+  const mapped = aliasReplaced.map((arr) => ({
+    name: arr[0],
+    diff: arr[2],
+    mapType: arr[4],
+    achi: arr[5],
+  }));
+
+  console.log(mapped);
+
+  // await kv.set(sid, JSON.stringify(mapped), {
+  //   pxat: +exp,
+  // });
+
+  return mapped;
+}
+
+export default async function HomePage() {
+  const { internationalSongs, versions } = await fetchMaimaiArcadeSongs();
+
+  const sid = cookies().get("sid")?.value;
+
+  if (sid) {
+    console.log(await kv.get(sid));
+  }
+
+  return (
+    <>
+      {!sid && (
+        <form action={maimaiScore}>
+          <textarea name="data" />
+          <input type="submit"></input>
+        </form>
+      )}
+      <div>
+        {versions.map((version) => {
+          return (
+            <div key={version.version}>
+              <p>{version.abbr}</p>
+              {internationalSongs
+                .filter((song) => song.version === version.version)
+                .map((song) => {
+                  return <div key={song.songId}> {song.title} </div>;
+                })}
+              <hr></hr>
+            </div>
+          );
+        })}
+      </div>
+    </>
+  );
+}
+
+type Version = { version: string; abbr: string };
+
+type Song = {
+  songId: string;
+  category: string;
+  title: string;
+  artist: string;
+  bpm: number;
+  imageName: string;
+  version: string;
+  releaseDate: string;
+  isNew: boolean;
+  isLocked: boolean;
+  sheets: Sheet[];
+};
+
+type Sheet = {
+  type: string;
+  difficulty: string;
+  level: string;
+  levelValue: number;
+  internalLevel: string;
+  internalLevelValue: number;
+  noteDesigner: string;
+  noteCounts: {
+    tap: number;
+    hold: number;
+    slide: number;
+    touch: number;
+    break: number;
+    total: number;
+  };
+  regions: {
+    jp: boolean;
+    intl: boolean;
+    cn: boolean;
+  };
+  version: string;
+};
