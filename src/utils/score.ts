@@ -1,5 +1,4 @@
 import { ChartType, Score } from "../../client-scripts/utils/fetch-score";
-import { ARCADE_SONG_DATA } from "./fetch-songs";
 
 export interface ScoreByVersion extends Score {
   version: string;
@@ -30,12 +29,3 @@ export function getDifficulty(difficultyString: string) {
 export function getChartType(type: string) {
   return type === "dx" ? ChartType.DX : ChartType.STANDARD;
 }
-
-// function mapScoreToVersion(score: Score): ScoreByVersion {
-//   return {
-//     ...score,
-//     version: ARCADE_SONG_DATA.find((song) => song.title === score.name),
-//   };
-// }
-
-// function groupScoreByVersion(scores: Score[]) {}
