@@ -1,5 +1,6 @@
 import { groupBy, uniqBy } from "lodash";
 import ArcadeSongData from "../../data.json";
+import { getOverrideVersion } from "./version-override";
 
 export const SONG_ALIAS: Record<string, string> = {
   "D✪N’T ST✪P R✪CKIN’": "D✪N’T  ST✪P  R✪CKIN’",
@@ -19,7 +20,10 @@ export const ALL_CHARTS = INTERNATIONAL_AVALIABLE_SONG.flatMap((song) => {
     title: SONG_ALIAS[song.title] || song.title,
     sheets: undefined,
   }));
-});
+}).map((i) => ({
+  ...i,
+  version: getOverrideVersion(i),
+}));
 
 export const CHART_BY_VERSION = groupBy(ALL_CHARTS, "version");
 

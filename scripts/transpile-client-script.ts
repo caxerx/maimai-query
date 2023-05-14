@@ -3,6 +3,8 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import typescript from "@rollup/plugin-typescript";
 import commonjs from "@rollup/plugin-commonjs";
 import terser from "@rollup/plugin-terser";
+import * as dotenv from "dotenv";
+dotenv.config();
 
 const outputOptionsList: OutputOptions[] = [
   {

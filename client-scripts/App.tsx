@@ -56,14 +56,13 @@ export default function App() {
               remasterParsed
             );
 
-            console.log(allParsed);
-
             const submitResp = (await postScore(allParsed)) as {
               dataId: string;
             };
 
             window.open(`${process.env.QUERY_HOST}/${submitResp.dataId}`);
           } catch (e) {
+            console.error(e);
             setMessage("Failed to fetch score.");
           }
 
