@@ -9,21 +9,19 @@ export const SONG_ALIAS: Record<string, string> = {
 export const ARCADE_SONG_DATA = ArcadeSongData.songs as Song[];
 export const ARCADE_SONGS_VERSION_DATA = ArcadeSongData.versions as Version[];
 
-export const INTERNATIONAL_AVALIABLE_SONG = ARCADE_SONG_DATA.filter((song) => {
-  return song.sheets.some((sheet) => sheet.regions.intl);
-});
-
-export const ALL_CHARTS = INTERNATIONAL_AVALIABLE_SONG.flatMap((song) => {
+export const ALL_CHARTS = ARCADE_SONG_DATA.flatMap((song) => {
   return song.sheets.map((sheet) => ({
     ...song,
     ...sheet,
     title: SONG_ALIAS[song.title] || song.title,
     sheets: undefined,
   }));
-}).map((i) => ({
-  ...i,
-  version: getOverrideVersion(i),
-}));
+})
+  .filter((i) => i.regions.intl)
+  .map((i) => ({
+    ...i,
+    version: getOverrideVersion(i),
+  }));
 
 export const CHART_BY_VERSION = groupBy(ALL_CHARTS, "version");
 

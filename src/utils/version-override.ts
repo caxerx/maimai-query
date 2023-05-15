@@ -26,6 +26,15 @@ const INTL_VER_OVERRIDES: ReadonlyArray<Partial<SongProperties>> = [
   { name: "自傷無色", dx: 1, debut: 19 },
   // 劣等上等 is debuted at Festival (intl), SPLASH (Jp)
   { name: "劣等上等", dx: 1, debut: 19 },
+
+  // INTERNET OVERDOSE is debuted at Festival (intl), Festival+ (Jp)
+  { name: "INTERNET OVERDOSE", dx: 1, debut: 19 },
+  // Trrricksters!! is debuted at Festival (intl), Festival+ (Jp)
+  { name: "Trrricksters!!", dx: 1, debut: 19 },
+  // Let you DIVE! is debuted at Festival (intl), Festival+ (Jp)
+  { name: "Let you DIVE!", dx: 1, debut: 19 },
+  // Knight Rider is debuted at Festival (intl), Festival+ (Jp)
+  { name: "Knight Rider", dx: 1, debut: 19 },
 ];
 
 export function getOverrideVersion(chart: Chart) {
