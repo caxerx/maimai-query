@@ -5,6 +5,7 @@ import { postScore } from "./utils/fetch";
 export default function App() {
   const [loading, setLoading] = useState(false);
   const [errorMessage, setMessage] = useState("");
+  const [dataId, setDataId] = useState("");
 
   return (
     <div
@@ -16,72 +17,100 @@ export default function App() {
         justifyContent: "center",
       }}
     >
-      <button
-        style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          border: "1px solid black",
-          width: "250px",
-          height: "50px",
-          background: "aquamarine",
-        }}
-        name="fetch-btn"
-        onClick={async () => {
-          if (loading) return;
-          setLoading(true);
-          try {
-            const basic = await fetchScore(Difficulty.BASIC);
-            const advanced = await fetchScore(Difficulty.ADVANCED);
-            const expert = await fetchScore(Difficulty.EXPERT);
-            const master = await fetchScore(Difficulty.MASTER);
-            const remaster = await fetchScore(Difficulty.ReMASTER);
+      {!dataId && (
+        <button
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid black",
+            width: "250px",
+            height: "50px",
+            background: "aquamarine",
+          }}
+          name="fetch-btn"
+          onClick={async () => {
+            if (loading) return;
+            setLoading(true);
+            try {
+              const basic = await fetchScore(Difficulty.BASIC);
+              const advanced = await fetchScore(Difficulty.ADVANCED);
+              const expert = await fetchScore(Difficulty.EXPERT);
+              const master = await fetchScore(Difficulty.MASTER);
+              const remaster = await fetchScore(Difficulty.ReMASTER);
 
-            const basicParsed = await parseSongList(basic, Difficulty.BASIC);
-            const advancedParsed = await parseSongList(
-              advanced,
-              Difficulty.ADVANCED
-            );
-            const expertParsed = await parseSongList(expert, Difficulty.EXPERT);
-            const masterParsed = await parseSongList(master, Difficulty.MASTER);
-            const remasterParsed = await parseSongList(
-              remaster,
-              Difficulty.ReMASTER
-            );
+              const basicParsed = await parseSongList(basic, Difficulty.BASIC);
+              const advancedParsed = await parseSongList(
+                advanced,
+                Difficulty.ADVANCED
+              );
+              const expertParsed = await parseSongList(
+                expert,
+                Difficulty.EXPERT
+              );
+              const masterParsed = await parseSongList(
+                master,
+                Difficulty.MASTER
+              );
+              const remasterParsed = await parseSongList(
+                remaster,
+                Difficulty.ReMASTER
+              );
 
-            const allParsed = basicParsed.concat(
-              advancedParsed,
-              expertParsed,
-              masterParsed,
-              remasterParsed
-            );
+              const allParsed = basicParsed.concat(
+                advancedParsed,
+                expertParsed,
+                masterParsed,
+                remasterParsed
+              );
 
-            const submitResp = (await postScore(allParsed)) as {
-              dataId: string;
-            };
+              const submitResp = (await postScore(allParsed)) as {
+                dataId: string;
+              };
 
-            window.open(`${process.env.QUERY_HOST}/${submitResp.dataId}`);
-          } catch (e) {
-            console.error(e);
-            setMessage("Failed to fetch score.");
-          }
+              setDataId(submitResp.dataId);
+              window.open(`${process.env.QUERY_HOST}/${submitResp.dataId}`);
+            } catch (e) {
+              console.error(e);
+              setMessage("Failed to fetch score.");
+            }
 
-          setLoading(false);
-        }}
-      >
-        {loading && (
-          <div
-            style={{
-              color: "black",
-              height: "32px",
-              width: "32px",
-            }}
-          >
-            <Loading></Loading>
-          </div>
-        )}
-        Analyze Completion
-      </button>
+            setLoading(false);
+          }}
+        >
+          {loading && (
+            <div
+              style={{
+                color: "black",
+                height: "32px",
+                width: "32px",
+              }}
+            >
+              <Loading></Loading>
+            </div>
+          )}
+          Analyze Progression
+        </button>
+      )}
+
+      {dataId && (
+        <a
+          href={`${process.env.QUERY_HOST}/${dataId}`}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            border: "1px solid black",
+            width: "250px",
+            height: "50px",
+            background: "aquamarine",
+          }}
+          target="_blank"
+        >
+          Show Progression
+        </a>
+      )}
+
       {errorMessage && (
         <p
           style={{

@@ -54,6 +54,15 @@ export const SELF_SCORE_URLS = new Map([
   ],
 ]);
 
+export function mapCurrentCategory(netCategory: string) {
+  const categoryMapping: Record<string, string> = {
+    "POPS＆ANIME": "POPS＆アニメ",
+    "niconico＆VOCALOID™": "niconico＆ボーカロイド",
+    "GAME＆VARIETY": "ゲーム＆バラエティ",
+  };
+  return categoryMapping[netCategory] ?? netCategory;
+}
+
 export async function fetchScore(difficulty: Difficulty) {
   const dom = await fetchPage(SELF_SCORE_URLS.get(difficulty) as string);
   return dom;
@@ -182,16 +191,31 @@ export async function parseSongList(
   difficulty?: Difficulty
 ): Promise<Score[]> {
   const rows = Array.from(
-    dom.querySelectorAll(".w_450.m_15.f_0") as NodeListOf<HTMLElement>
+    dom.querySelectorAll(
+      ".w_450.m_15.f_0, .screw_block.m_15.f_15.scroll_point"
+    ) as NodeListOf<HTMLElement>
   );
 
-  return rows.map((row) => ({
-    name: getSongName(row)!,
-    dx: getChartType(row),
-    achivement: getSongAchievement(row),
-    ...getComboSyncStatus(row),
-    difficulty,
-  }));
+  let currentCategory = "";
+  const scores: Score[] = [];
+
+  for (let i = 0; i < rows.length; i++) {
+    const row = rows[i];
+    if (!row.querySelector("div")) {
+      currentCategory = mapCurrentCategory(row.innerText);
+      continue;
+    }
+    scores.push({
+      name: getSongName(row)!,
+      dx: getChartType(row),
+      achivement: getSongAchievement(row),
+      ...getComboSyncStatus(row),
+      difficulty,
+      category: currentCategory,
+    });
+  }
+
+  return scores;
 }
 
 export interface Score {
@@ -200,5 +224,6 @@ export interface Score {
   achivement: number;
   comboStatus: ComboStatus;
   syncStatus: SyncStatus;
+  category: string;
   difficulty?: Difficulty;
 }
